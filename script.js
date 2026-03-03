@@ -116,3 +116,27 @@ async function deleteEvent(id) {
         saveAndRender();
     });
 });
+const express = require('express');
+const { createClient } = require('@supabase/supabase-js');
+require('dotenv').config();
+
+const app = express();
+app.use(express.json());
+
+// Initialize Supabase with Service Role Key (Server-side ONLY)
+const supabase = createClient(
+  process.env.SUPABASE_URL, 
+  process.env.SUPABASE_SERVICE_KEY
+);
+
+// Your API Endpoint
+app.get('/api/data', async (req, res) => {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*');
+
+  if (error) return res.status(500).json(error);
+  res.status(200).json(data);
+});
+
+app.listen(3000, () => console.log('API running on http://localhost:3000'));
