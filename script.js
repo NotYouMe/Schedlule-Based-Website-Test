@@ -76,46 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('clear-data').addEventListener('click', () => {
         events = [];
 
-        // 1. Initialize Supabase
-const supabaseUrl = 'YOUR_SUPABASE_URL';
-const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
-const supabase = supabase.createClient(supabaseUrl, supabaseKey);
-
-// 2. Modified: Add Event (Save to Database)
-async function addEventToDB() {
-    const taskValue = document.getElementById('task-input').value;
-    const timeValue = document.getElementById('time-input').value;
-
-    const { data, error } = await supabase
-        .from('thoughts')
-        .insert([{ task: taskValue, assigned_time: timeValue }]);
-
-    if (error) console.error('Error saving:', error);
-    else fetchEvents(); // Refresh UI
-}
-
-// 3. Modified: Fetch Events (Retrieve from Database)
-async function fetchEvents() {
-    const { data, error } = await supabase
-        .from('thoughts')
-        .select('*')
-        .order('assigned_time', { ascending: true });
-
-    if (error) {
-        console.error('Error fetching:', error);
-    } else {
-        renderEvents(data); // Pass server data to your UI function
-    }
-}
-
-// 4. Modified: Delete Event
-async function deleteEvent(id) {
-    await supabase.from('thoughts').delete().eq('id', id);
-    fetchEvents();
-}
-        saveAndRender();
-    });
-});
 const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
