@@ -100,3 +100,50 @@ app.get('/api/data', async (req, res) => {
 });
 
 app.listen(3000, () => console.log('API running on http://localhost:3000'));
+// ... (previous supabase init code) ...
+
+const authContainer = document.getElementById('auth-container');
+const mainApp = document.getElementById('main-app');
+
+// 1. Monitor Auth State
+supabase.auth.onAuthStateChange((event, session) => {
+    if (session) {
+        authContainer.style.display = 'none';
+        mainApp.style.display = 'block';
+        fetchUserEvents(); // Only fetch when logged in
+    } else {
+        authContainer.style.display = 'flex';
+        mainApp.style.display = 'none';
+    }
+});
+
+// 2. Sign Up / Login Functions
+document.getElementById('signup-btn').addEventListener('click', async () => {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) alert(error.message);
+    else alert("Check your email for the confirmation link!");
+});
+
+document.getElementById('login-btn').addEventListener('click', async () => {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) alert(error.message);
+});
+
+document.getElementById('logout-btn').addEventListener('click', () => supabase.auth.signOut());
+
+// 3. Modified Fetch: Uses the User's Unique ID (UID)
+async function fetchUserEvents() {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    const { data, error } = await supabase
+        .from('thoughts')
+        .select('*')
+        .eq('user_id', user.id) // Filter by the logged-in user
+        .order('assigned_time', { ascending: true });
+
+    if (!error) renderEvents(data);
+}
